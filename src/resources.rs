@@ -24,6 +24,7 @@
  */
 
 use sysctl::Sysctl;
+use sysctl::Ctl;
 
 pub struct Resources {
     
@@ -41,15 +42,19 @@ impl Resources {
 	let cache = sysctl::Ctl::new("vm.stats.vm.v_cache_count").unwrap();
 	let free = sysctl::Ctl::new("vm.stats.vm.v_free_count").unwrap();
 
-	let mem_all = *physmem.value_as::<u64>().unwrap();
-	let page_size = *pagesize.value_as::<u64>().unwrap();
+	let mem_all = self.get_value(physmem);
+	let page_size = self.get_value(pagesize);
 	
-	let mem_inactive = *inactive.value_as::<u64>().unwrap() * page_size;
-	let mem_cache = *cache.value_as::<u64>().unwrap() * page_size;
-	let mem_free = *free.value_as::<u64>().unwrap() * page_size;
+	let mem_inactive = self.get_value(inactive) * page_size;
+	let mem_cache = self.get_value(cache) * page_size;
+	let mem_free = self.get_value(free) * page_size;
 
 	let total = mem_all - (mem_inactive + mem_cache + mem_free);
 
 	(total / mem_all) * 100
+    }
+
+    fn get_value(&self, ctl: Ctl) -> u64 {
+	ctl.value_string().unwrap().parse::<u64>().unwrap()
     }
 }
