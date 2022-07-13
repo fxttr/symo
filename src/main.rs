@@ -28,8 +28,10 @@ mod date;
 mod edition;
 mod network;
 mod volume;
+mod jails;
 
 use config::Config;
+use jails::Jails;
 use std::path::Path;
 use crate::{date::Date, network::Network, volume::Volume};
 use std::time::Duration;
@@ -37,24 +39,45 @@ use std::thread;
 use std::io::Write;
 
 fn main() {
+    let duration = Duration::from_millis(1000);
     let config: Config = Config::new(Path::new("config.toml")).unwrap();
     let network: Network = Network::new();
-    //let volume: Volume = Volume::new();
+    let mut jails: Jails = Jails::new();
     
+    //let volume: Volume = Volume::new();
+
+    loop {
+	let jail_changes = jails.check();
+
+	if (jail_changes != "")
+	{
+	    show_monitor(&jail_changes);
+	}
+	
+	print!("\r{} < {}", network.get_nics(), Date::get(&config.date.format));
+	std::io::stdout().flush();
+	thread::sleep(duration);
+    }
     //println!("{} <- {} <- {}", volume.read(), network.get_nics(), Date::get(&config.date.format));
-    show_monitor("Dies ist ein langer test, lang und noch länger scroling");
+    show_monitor("");
 }
 
 fn show_monitor(msg: &str) {
     let duration = Duration::from_millis(100);
     let len: usize = 20;
-    let mut steps: usize = msg.chars().count() - 20 + 1;
+    let mut steps: usize = 1;
+    
+    if(msg.chars().count() >= 20) {
+	steps = msg.chars().count() - 20 + 1;
+    }
 
     for step in 0..steps {
 	print!("\r{}", truncate(msg, step, len));
 	std::io::stdout().flush();
 	thread::sleep(duration);
     }
+
+    thread::sleep(Duration::from_millis(2000));
 }
 
 fn truncate(msg: &str, start: usize, len: usize) -> String {
