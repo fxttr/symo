@@ -29,51 +29,72 @@ mod edition;
 mod network;
 mod volume;
 mod jails;
+mod resources;
 
 use config::Config;
 use jails::Jails;
+use resources::Resources;
+use x11::xlib::{XOpenDisplay, XRootWindow, XDefaultScreen, _XDisplay, XStoreName, XFlush};
 use std::path::Path;
 use crate::{date::Date, network::Network, volume::Volume};
 use std::time::Duration;
-use std::thread;
-use std::io::Write;
+use std::{thread, ptr};
+use std::ffi::CString;
 
 fn main() {
     let duration = Duration::from_millis(1000);
     let config: Config = Config::new(Path::new("config.toml")).unwrap();
     let network: Network = Network::new();
     let mut jails: Jails = Jails::new();
+    let volume: Volume = Volume::new();
+    let resources: Resources = Resources::new();
     
-    //let volume: Volume = Volume::new();
-
-    loop {
-	let jail_changes = jails.check();
-
-	if (jail_changes != "")
-	{
-	    show_monitor(&jail_changes);
-	}
+    unsafe {
+	let dpy = XOpenDisplay(ptr::null());
+	let screen = XDefaultScreen(dpy);
+	let root = XRootWindow(dpy, screen);
 	
-	print!("\r{} < {}", network.get_nics(), Date::get(&config.date.format));
-	std::io::stdout().flush();
-	thread::sleep(duration);
+	loop {
+	    let jail_changes = jails.check();
+
+	    if jail_changes != ""
+	    {
+		show_monitor(&jail_changes, dpy, root);
+	    }
+	
+	    put(&format!("      {}      {}      {} %      {}",
+			 resources.read_memory(),
+			 network.get_nics(),
+			 volume.read(),
+			 Date::get(&config.date.format)),
+		dpy, root);
+	    
+	    thread::sleep(duration);
+	}
     }
-    //println!("{} <- {} <- {}", volume.read(), network.get_nics(), Date::get(&config.date.format));
-    show_monitor("");
 }
 
-fn show_monitor(msg: &str) {
+fn put(msg: &str, dpy: *mut _XDisplay, root: u64) {
+    unsafe {
+	let c_msg = CString::new(msg).unwrap();
+	
+	XStoreName(dpy, root, c_msg.as_ptr());
+	XFlush(dpy);
+    }
+}
+
+fn show_monitor(msg: &str, dpy: *mut _XDisplay, root: u64) {
     let duration = Duration::from_millis(100);
     let len: usize = 20;
     let mut steps: usize = 1;
     
-    if(msg.chars().count() >= 20) {
+    if msg.chars().count() >= 20 {
 	steps = msg.chars().count() - 20 + 1;
     }
 
     for step in 0..steps {
-	print!("\r{}", truncate(msg, step, len));
-	std::io::stdout().flush();
+	put(&truncate(msg, step, len), dpy, root);
+
 	thread::sleep(duration);
     }
 

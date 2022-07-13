@@ -9,6 +9,7 @@ license = "BSD-2-Clause"
 categories = ["command-line-utilities"]
 repository = "https://github.com/fxttr/symo"
 keywords = ["x11", "dwm", "wm", "status"]
+build = "build.rs"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -22,3 +23,4 @@ kqueue = "1.0.6"
 jail = "*"
 x11 = "2.19.1"
 libzetta = "0.3.1"
+sysctl = "0.4.4"

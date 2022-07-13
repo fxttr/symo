@@ -23,33 +23,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-use sysctl::Sysctl;
-
-pub struct Resources {
-    
-}
-
-impl Resources {
-    pub fn new() -> Self {
-	Self {}
-    }
-
-    pub fn read_memory(&self) -> u64 {
-	let physmem = sysctl::Ctl::new("hw.physmem").unwrap();
-	let pagesize = sysctl::Ctl::new("hw.pagesize").unwrap();
-	let inactive = sysctl::Ctl::new("vm.stats.vm.v_inactive_count").unwrap();
-	let cache = sysctl::Ctl::new("vm.stats.vm.v_cache_count").unwrap();
-	let free = sysctl::Ctl::new("vm.stats.vm.v_free_count").unwrap();
-
-	let mem_all = *physmem.value_as::<u64>().unwrap();
-	let page_size = *pagesize.value_as::<u64>().unwrap();
-	
-	let mem_inactive = *inactive.value_as::<u64>().unwrap() * page_size;
-	let mem_cache = *cache.value_as::<u64>().unwrap() * page_size;
-	let mem_free = *free.value_as::<u64>().unwrap() * page_size;
-
-	let total = mem_all - (mem_inactive + mem_cache + mem_free);
-
-	(total / mem_all) * 100
-    }
+fn main() {
+    for lib in &["X11"] {                                
+        println!("cargo:rustc-link-lib={}", lib);                        
+    } 
+    println!(r"cargo:rustc-link-search=/usr/local/lib/");
 }
