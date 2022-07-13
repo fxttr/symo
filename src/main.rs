@@ -32,11 +32,31 @@ mod volume;
 use config::Config;
 use std::path::Path;
 use crate::{date::Date, network::Network, volume::Volume};
+use std::time::Duration;
+use std::thread;
+use std::io::Write;
 
 fn main() {
     let config: Config = Config::new(Path::new("config.toml")).unwrap();
     let network: Network = Network::new();
-    let volume: Volume = Volume::new();
+    //let volume: Volume = Volume::new();
     
-    println!("{} <- {} <- {}", volume.read(), network.get_nics(), Date::get(&config.date.format));
+    //println!("{} <- {} <- {}", volume.read(), network.get_nics(), Date::get(&config.date.format));
+    show_monitor("Dies ist ein langer test, lang und noch länger scroling");
+}
+
+fn show_monitor(msg: &str) {
+    let duration = Duration::from_millis(100);
+    let len: usize = 20;
+    let mut steps: usize = msg.chars().count() - 20 + 1;
+
+    for step in 0..steps {
+	print!("\r{}", truncate(msg, step, len));
+	std::io::stdout().flush();
+	thread::sleep(duration);
+    }
+}
+
+fn truncate(msg: &str, start: usize, len: usize) -> String {
+    msg.chars().skip(start).take(len).collect::<String>()
 }
