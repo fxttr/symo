@@ -1,0 +1,16 @@
+[components]
+edition = true
+mail = true
+cpu = true
+memory = true
+wifi = false
+ethernet = true
+battery = false
+volume = true
+date = true
+
+[settings]
+refresh_intervall = 1 # In Seconds
+
+[date]
+format = "%H:%M:%S - %d.%m.%Y"
