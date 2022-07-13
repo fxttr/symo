@@ -2,6 +2,13 @@
 name = "symo"
 version = "0.1.0"
 edition = "2021"
+authors = ["Florian Büstgens <fb@fx-ttr.de>"]
+description = "A simple DWM status bar for FreeBSD"
+readme = "README.md"
+license = "BSD-2-Clause"
+categories = ["command-line-utilities"]
+repository = "https://github.com/fxttr/symo"
+keywords = ["x11", "dwm", "wm", "status"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
