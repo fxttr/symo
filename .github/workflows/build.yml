@@ -20,7 +20,7 @@ jobs:
       uses: vmactions/freebsd-vm@v0.1.5
       with:
           prepare: pkg install -y rust
-          usessh: true
+          usesh: true
           run: |
             cargo build --verbose
             cargo test --verbose
