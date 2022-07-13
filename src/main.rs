@@ -30,6 +30,7 @@ mod network;
 mod volume;
 mod jails;
 mod resources;
+mod mail;
 
 use config::Config;
 use jails::Jails;
