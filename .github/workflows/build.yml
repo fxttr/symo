@@ -1,0 +1,26 @@
+name: Rust
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    runs-on: macos-12
+    name: Build on FreeBSD
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build
+      id: test
+      uses: vmactions/freebsd-vm@v0.1.5
+      with:
+          prepare: pkg install -y rust
+          usesh: true
+          run: |
+            cargo build --verbose
+            cargo test --verbose
