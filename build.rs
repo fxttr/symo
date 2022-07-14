@@ -24,7 +24,7 @@
  */
 
 fn main() {
-    for lib in &["X11", "xapian"] {                                
+    for lib in &["X11"] {                                
         println!("cargo:rustc-link-lib={}", lib);                        
     } 
     println!(r"cargo:rustc-link-search=/usr/local/lib/");
