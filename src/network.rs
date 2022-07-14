@@ -28,7 +28,8 @@ use std::net;
 use interfaces::Interface;
 
 pub struct Network {
-    interfaces: Vec<Interface>
+    interfaces: Vec<Interface>,
+    rounds: i32
 }
 
 impl Network {
@@ -36,17 +37,18 @@ impl Network {
         let interfaces = Interface::get_all().expect("Could not get any network Interfaces. Network component disabled.");
 
         Network {
-            interfaces
+            interfaces,
+	    rounds: 0
         }
     }
 
-    pub fn get_nics(&self) -> String {
+    pub fn get_nics(&mut self) -> String {
         let mut result: String = String::new();
 
         for interface in self.interfaces.iter().filter(|x| x.is_up() && x.is_running() && !x.is_loopback()) {
 	    let mut nic_addr: String = String::new();
 
-	    interface.addresses.iter().for_each(|x| {
+	      interface.addresses.iter().for_each(|x| {
 		match x.addr {
 		    Some(x) => {
 			nic_addr = match x {
@@ -64,6 +66,8 @@ impl Network {
 	    
             result = result + " " + &interface.name + " " + &nic_addr
         }
+
+	self.rounds = (self.rounds + 1) % 10;
 
         result
     }

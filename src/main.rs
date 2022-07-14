@@ -30,11 +30,10 @@ mod network;
 mod volume;
 mod jails;
 mod resources;
-mod mail;
 
 use config::Config;
 use jails::Jails;
-use resources::Resources;
+use resources::memory::Memory;
 use x11::xlib::{XOpenDisplay, XRootWindow, XDefaultScreen, _XDisplay, XStoreName, XFlush};
 use std::path::Path;
 use crate::{date::Date, network::Network, volume::Volume};
@@ -45,10 +44,11 @@ use std::ffi::CString;
 fn main() {
     let duration = Duration::from_millis(1000);
     let config: Config = Config::new(Path::new("config.toml")).unwrap();
-    let network: Network = Network::new();
+    let mut network: Network = Network::new();
     let mut jails: Jails = Jails::new();
     let volume: Volume = Volume::new();
-    let resources: Resources = Resources::new();
+    let resources: Memory = Memory::new();
+    volume.detect();
     
     unsafe {
 	let dpy = XOpenDisplay(ptr::null());
@@ -63,7 +63,7 @@ fn main() {
 		show_monitor(&jail_changes, dpy, root);
 	    }
 	
-	    put(&format!("      {}      {}      {} %      {}",
+	    put(&format!("      {} %      {}      {} %      {}",
 			 resources.read_memory(),
 			 network.get_nics(),
 			 volume.read(),

@@ -23,9 +23,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-use std::fs::File;
+use std::{fs::File, os::unix::prelude::AsRawFd};
 
-use nix::{libc::ioctl, ioctl_read};
+use nix::{libc::ioctl, request_code_read};
 
 pub struct Volume {
     // See sys/soundcard.h:1009
@@ -46,17 +46,19 @@ impl Volume {
 	}
     }
 
-    pub fn read(&self) -> i64 {
-	let result: i64 = -1;
+    pub fn read(&self) -> i32 {
 	const SPI_IOC_MAGIC: u8 = b'M';
-	const SPI_IOC_TYPE_MODE: u8 = 1;
 	
-	ioctl_read!(result, SPI_IOC_MAGIC, SPI_IOC_TYPE_MODE, i64);
-	
-	result & 0x7f
+	let result: i32 = -1;
+	let device: u8 = self.detect() as u8;
+
+	unsafe {
+	    ioctl(self.mixer.as_raw_fd(), request_code_read!(SPI_IOC_MAGIC, device, std::mem::size_of::<i32>()), &result);
+	    result & 0x7f
+	}
     }
 
-    fn detect(&self) -> usize {
+    pub fn detect(&self) -> usize {	
 	self.devices.iter().position(|&x| x == "vol").expect("Could not find device. This should not happen!")
     }
 }

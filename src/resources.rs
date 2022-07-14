@@ -23,38 +23,4 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-use sysctl::Sysctl;
-use sysctl::Ctl;
-
-pub struct Resources {
-    
-}
-
-impl Resources {
-    pub fn new() -> Self {
-	Self {}
-    }
-
-    pub fn read_memory(&self) -> u64 {
-	let physmem = sysctl::Ctl::new("hw.physmem").unwrap();
-	let pagesize = sysctl::Ctl::new("hw.pagesize").unwrap();
-	let inactive = sysctl::Ctl::new("vm.stats.vm.v_inactive_count").unwrap();
-	let cache = sysctl::Ctl::new("vm.stats.vm.v_cache_count").unwrap();
-	let free = sysctl::Ctl::new("vm.stats.vm.v_free_count").unwrap();
-
-	let mem_all = self.get_value(physmem);
-	let page_size = self.get_value(pagesize);
-	
-	let mem_inactive = self.get_value(inactive) * page_size;
-	let mem_cache = self.get_value(cache) * page_size;
-	let mem_free = self.get_value(free) * page_size;
-
-	let total = mem_all - (mem_inactive + mem_cache + mem_free);
-
-	(total / mem_all) * 100
-    }
-
-    fn get_value(&self, ctl: Ctl) -> u64 {
-	ctl.value_string().unwrap().parse::<u64>().unwrap()
-    }
-}
+pub mod memory;
