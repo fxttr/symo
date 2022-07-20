@@ -30,7 +30,9 @@ mod network;
 mod volume;
 mod jails;
 mod resources;
+mod battery;
 
+use battery::Battery;
 use config::Config;
 use jails::Jails;
 use resources::memory::Memory;
@@ -43,11 +45,12 @@ use std::ffi::CString;
 
 fn main() {
     let duration = Duration::from_millis(1000);
-    let config: Config = Config::new(Path::new("config.toml")).unwrap();
+    let config: Config = Config::new(Path::new("/usr/local/etc/symo.toml")).unwrap();
     let mut network: Network = Network::new();
     let mut jails: Jails = Jails::new();
     let volume: Volume = Volume::new();
     let resources: Memory = Memory::new();
+    let battery: Battery = Battery {  };
     volume.detect();
     
     unsafe {
@@ -63,9 +66,10 @@ fn main() {
 		show_monitor(&jail_changes, dpy, root);
 	    }
 	
-	    put(&format!("      {} %      {}      {} %      {}",
+	    put(&format!("      {} %       {}      {}      {} %      {}",
 			 resources.read_memory(),
 			 network.get_nics(),
+			 battery.check(),
 			 volume.read(),
 			 Date::get(&config.date.format)),
 		dpy, root);
