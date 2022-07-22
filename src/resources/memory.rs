@@ -26,6 +26,8 @@
 use sysctl::Sysctl;
 use sysctl::Ctl;
 
+use crate::monitor::Monitor;
+
 pub struct Memory {
     
 }
@@ -35,7 +37,13 @@ impl Memory {
 	Self {}
     }
 
-    pub fn read_memory(&self) -> u64 {
+    fn get_value(&self, ctl: Ctl) -> u64 {
+	ctl.value_string().unwrap().parse::<u64>().unwrap()
+    }
+}
+
+impl Monitor for Memory {
+    fn read(&mut self) -> String {
 	let physmem = sysctl::Ctl::new("hw.physmem").unwrap();
 	let pagesize = sysctl::Ctl::new("hw.pagesize").unwrap();
 	let inactive = sysctl::Ctl::new("vm.stats.vm.v_inactive_count").unwrap();
@@ -51,10 +59,6 @@ impl Memory {
 
 	let total = mem_all - (mem_inactive + mem_cache + mem_free);
 
-	((total as f64 / mem_all as f64) * 100.0) as u64
-    }
-
-    fn get_value(&self, ctl: Ctl) -> u64 {
-	ctl.value_string().unwrap().parse::<u64>().unwrap()
+	((total as f64 / mem_all as f64) * 100.0).to_string()
     }
 }

@@ -27,6 +27,8 @@ use std::net;
 
 use interfaces::Interface;
 
+use crate::monitor::Monitor;
+
 pub struct Network {
     interfaces: Vec<Interface>,
     rounds: i32
@@ -41,8 +43,10 @@ impl Network {
 	    rounds: 0
         }
     }
+}
 
-    pub fn get_nics(&mut self) -> String {
+impl Monitor for Network {
+    fn read(&mut self) -> String {
         let mut result: String = String::new();
 
         for interface in self.interfaces.iter().filter(|x| x.is_up() && x.is_running() && !x.is_loopback()) {

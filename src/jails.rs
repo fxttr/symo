@@ -25,6 +25,8 @@
 
 use jail::RunningJail;
 
+use crate::monitor::Monitor;
+
 pub struct Jails {
     running: Vec::<String>
 }
@@ -41,8 +43,9 @@ impl Jails {
 	    running
 	}
     }
-
-    pub fn check(&mut self) -> String {
+}
+impl Monitor for Jails {
+    fn read(&mut self) -> String {
 	let mut new_jails = Vec::new();
 	let mut result = String::new();
 

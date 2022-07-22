@@ -1,9 +1,5 @@
 [components]
-edition = true
-mail = true
-cpu = true
 memory = true
-wifi = false
 ethernet = true
 battery = false
 volume = true

@@ -25,10 +25,22 @@
 
 use chrono::Local;
 
-pub struct Date {}
+use crate::monitor::Monitor;
+
+pub struct Date {
+    format: String
+}
 
 impl Date {
-    pub fn get(format: &str) -> String {
-	Local::now().format(format).to_string()
+    pub fn new(format: &str) -> Self {
+	Self {
+	    format: format.to_string()
+	}
+    }
+}
+
+impl Monitor for Date {
+    fn read(&mut self) -> String {
+	Local::now().format(&self.format).to_string()
     }
 }

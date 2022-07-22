@@ -37,11 +37,7 @@ pub struct Config {
 
 #[derive(Deserialize)]
 pub struct Components {
-    pub edition: bool,
-    pub mail: bool,
-    pub cpu: bool,
     pub memory: bool,
-    pub wifi: bool,
     pub ethernet: bool,
     pub battery: bool,
     pub volume: bool,

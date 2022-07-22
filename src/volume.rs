@@ -27,9 +27,9 @@ use std::{fs::File, os::unix::prelude::AsRawFd};
 
 use nix::{libc::ioctl, request_code_read};
 
+use crate::monitor::Monitor;
+
 pub struct Volume {
-    // See sys/soundcard.h:1009
-    devices: [&'static str; 25],
     mixer: File
 }
 
@@ -38,27 +38,21 @@ impl Volume {
 	let mixer = File::open("/dev/mixer").expect("Could not open mixer file.");
 	
 	Self {
-	    devices: ["vol", "bass", "treble", "synth", "pcm", "speaker", "line", 
-		      "mic", "cd", "mix", "pcm2", "rec", "igain", "ogain", 
-		      "line1", "line2", "line3", "dig1", "dig2", "dig3", 
-		      "phin", "phout", "video", "radio", "monitor"],
 	    mixer
 	}
     }
+}
 
-    pub fn read(&self) -> i32 {
+impl Monitor for Volume {
+    fn read(&mut self) -> String {
 	const SPI_IOC_MAGIC: u8 = b'M';
 	
 	let result: i32 = -1;
-	let device: u8 = self.detect() as u8;
+	let device: u8 = 0; // We always want "vol". See sys/soundcard.sh:1009
 
 	unsafe {
 	    ioctl(self.mixer.as_raw_fd(), request_code_read!(SPI_IOC_MAGIC, device, std::mem::size_of::<i32>()), &result);
-	    result & 0x7f
+	    (result & 0x7f).to_string()
 	}
-    }
-
-    pub fn detect(&self) -> usize {	
-	self.devices.iter().position(|&x| x == "vol").expect("Could not find device. This should not happen!")
     }
 }

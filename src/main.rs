@@ -25,66 +25,89 @@
 
 mod config;
 mod date;
-mod edition;
-mod network;
-mod volume;
 mod jails;
+mod network;
 mod resources;
-mod battery;
+mod volume;
+mod monitor;
 
-use battery::Battery;
+use crate::{date::Date, network::Network, volume::Volume};
 use config::Config;
 use jails::Jails;
+use monitor::Monitor;
+use resources::battery::Battery;
 use resources::memory::Memory;
-use x11::xlib::{XOpenDisplay, XRootWindow, XDefaultScreen, _XDisplay, XStoreName, XFlush};
-use std::path::Path;
-use crate::{date::Date, network::Network, volume::Volume};
-use std::time::Duration;
-use std::{thread, ptr};
+use std::collections::HashMap;
 use std::ffi::CString;
+use std::path::Path;
+use std::time::Duration;
+use std::{ptr, thread};
+use x11::xlib::{XDefaultScreen, XFlush, XOpenDisplay, XRootWindow, XStoreName, _XDisplay};
 
 fn main() {
-    let duration = Duration::from_millis(1000);
     let config: Config = Config::new(Path::new("/usr/local/etc/symo.toml")).unwrap();
+    let duration = Duration::from_millis(config.settings.refresh_intervall as u64 * 1000);
     let mut network: Network = Network::new();
     let mut jails: Jails = Jails::new();
-    let volume: Volume = Volume::new();
-    let resources: Memory = Memory::new();
-    let battery: Battery = Battery {  };
-    volume.detect();
+    let mut volume: Volume = Volume::new();
+    let mut memory: Memory = Memory::new();
+    let mut battery: Battery = Battery::new();
+    let mut date: Date = Date::new(&config.date.format);
+
+    let mut update_vec: HashMap<(char, char), &dyn Monitor> = HashMap::new();
+
+    watch(&mut update_vec, ('','%'), &memory, config.components.memory);
+    watch(&mut update_vec, ('',' '), &network, config.components.ethernet);
+    watch(&mut update_vec, ('',' '), &battery, config.components.battery);
+    watch(&mut update_vec, ('','%'), &volume, config.components.volume);
+    watch(&mut update_vec, ('',' '), &date, config.components.date);
+    
     
     unsafe {
-	let dpy = XOpenDisplay(ptr::null());
-	let screen = XDefaultScreen(dpy);
-	let root = XRootWindow(dpy, screen);
-	
-	loop {
-	    let jail_changes = jails.check();
+        let dpy = XOpenDisplay(ptr::null());
+        let screen = XDefaultScreen(dpy);
+        let root = XRootWindow(dpy, screen);
 
-	    if jail_changes != ""
-	    {
-		show_monitor(&jail_changes, dpy, root);
-	    }
-	
-	    put(&format!("      {} %       {}      {}      {} %      {}",
-			 resources.read_memory(),
-			 network.get_nics(),
-			 battery.check(),
-			 volume.read(),
-			 Date::get(&config.date.format)),
-		dpy, root);
+        loop {
+            let jail_changes = jails.read();
+	    let mut msg: String = String::new();
+	    msg = msg + "     ";
 	    
-	    thread::sleep(duration);
-	}
+            if jail_changes != "" {
+                show_monitor(&jail_changes, dpy, root);
+            }
+
+	    for ((icon, suffix), module) in &update_vec {
+		msg = msg + &add(&module.read(), *icon, *suffix);
+	    }
+
+            put(
+                &msg,
+                dpy,
+                root,
+            );
+
+            thread::sleep(duration);
+        }
     }
 }
 
 fn put(msg: &str, dpy: *mut _XDisplay, root: u64) {
     unsafe {
-	let c_msg = CString::new(msg).unwrap();
-	
-	XStoreName(dpy, root, c_msg.as_ptr());
-	XFlush(dpy);
+        let c_msg = CString::new(msg).unwrap();
+
+        XStoreName(dpy, root, c_msg.as_ptr());
+        XFlush(dpy);
+    }
+}
+
+fn add(module: &str, icon: char, suffix: char) -> String {
+    icon.to_string() + " " + module + " " + &suffix.to_string() + "     "
+}
+
+fn watch(map: &mut HashMap<(char, char), &dyn Monitor>, format_pair: (char, char), module: &'static dyn Monitor, option: bool) {
+    if option {
+	map.insert(format_pair, module);
     }
 }
 
@@ -92,15 +115,15 @@ fn show_monitor(msg: &str, dpy: *mut _XDisplay, root: u64) {
     let duration = Duration::from_millis(100);
     let len: usize = 20;
     let mut steps: usize = 1;
-    
+
     if msg.chars().count() >= 20 {
-	steps = msg.chars().count() - 20 + 1;
+        steps = msg.chars().count() - 20 + 1;
     }
 
     for step in 0..steps {
-	put(&truncate(msg, step, len), dpy, root);
+        put(&truncate(msg, step, len), dpy, root);
 
-	thread::sleep(duration);
+        thread::sleep(duration);
     }
 
     thread::sleep(Duration::from_millis(2000));
