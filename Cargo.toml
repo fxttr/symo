@@ -1,6 +1,6 @@
 [package]
 name = "symo"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 authors = ["Florian Büstgens <fb@fx-ttr.de>"]
 description = "A simple DWM status bar for FreeBSD"

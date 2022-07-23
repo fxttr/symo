@@ -38,7 +38,6 @@ use monitor::Monitor;
 use resources::battery::Battery;
 use resources::memory::Memory;
 use std::ffi::CString;
-use std::fmt::format;
 use std::path::Path;
 use std::time::Duration;
 use std::{ptr, thread};
