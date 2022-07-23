@@ -106,7 +106,7 @@ fn main() {
             }
 
             for (icon, suffix, module) in update_map.iter_mut() {
-                msg = msg + &add(&module.read(), *icon, *suffix);
+                msg = format!("{}      {} {} {}", msg, *icon, module.read(), *suffix);
             }
 
             put(&msg, dpy, root);
@@ -122,10 +122,6 @@ fn put(msg: &str, dpy: *mut _XDisplay, root: u64) {
         XStoreName(dpy, root, c_msg.as_ptr());
         XFlush(dpy);
     }
-}
-
-fn add(module: &str, icon: char, suffix: char) -> String {
-    format!("      {} {} {}", icon, module, suffix)
 }
 
 fn watch<'a>(
