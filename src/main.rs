@@ -26,10 +26,10 @@
 mod config;
 mod date;
 mod jails;
+mod monitor;
 mod network;
 mod resources;
 mod volume;
-mod monitor;
 
 use crate::{date::Date, network::Network, volume::Volume};
 use config::Config;
@@ -37,8 +37,8 @@ use jails::Jails;
 use monitor::Monitor;
 use resources::battery::Battery;
 use resources::memory::Memory;
-use std::collections::HashMap;
 use std::ffi::CString;
+use std::fmt::format;
 use std::path::Path;
 use std::time::Duration;
 use std::{ptr, thread};
@@ -47,22 +47,50 @@ use x11::xlib::{XDefaultScreen, XFlush, XOpenDisplay, XRootWindow, XStoreName, _
 fn main() {
     let config: Config = Config::new(Path::new("/usr/local/etc/symo.toml")).unwrap();
     let duration = Duration::from_millis(config.settings.refresh_intervall as u64 * 1000);
-    let mut network: Network = Network::new();
+    let network: Network = Network::new();
     let mut jails: Jails = Jails::new();
-    let mut volume: Volume = Volume::new();
-    let mut memory: Memory = Memory::new();
-    let mut battery: Battery = Battery::new();
-    let mut date: Date = Date::new(&config.date.format);
+    let volume: Volume = Volume::new();
+    let memory: Memory = Memory::new();
+    let battery: Battery = Battery::new();
+    let date: Date = Date::new(&config.date.format);
 
-    let mut update_vec: HashMap<(char, char), &dyn Monitor> = HashMap::new();
+    let mut update_map: Vec<(char, char, Box<dyn Monitor>)> = Vec::new();
 
-    watch(&mut update_vec, ('','%'), &memory, config.components.memory);
-    watch(&mut update_vec, ('',' '), &network, config.components.ethernet);
-    watch(&mut update_vec, ('',' '), &battery, config.components.battery);
-    watch(&mut update_vec, ('','%'), &volume, config.components.volume);
-    watch(&mut update_vec, ('',' '), &date, config.components.date);
-    
-    
+    watch(
+        &mut update_map,
+        ('', '%'),
+        Box::new(memory),
+        config.components.memory,
+    );
+
+    watch(
+        &mut update_map,
+        ('', ' '),
+        Box::new(network),
+        config.components.ethernet,
+    );
+
+    watch(
+        &mut update_map,
+        ('', ' '),
+        Box::new(battery),
+        config.components.battery,
+    );
+
+    watch(
+        &mut update_map,
+        ('', '%'),
+        Box::new(volume),
+        config.components.volume,
+    );
+
+    watch(
+        &mut update_map,
+        ('', ' '),
+        Box::new(date),
+        config.components.date,
+    );
+
     unsafe {
         let dpy = XOpenDisplay(ptr::null());
         let screen = XDefaultScreen(dpy);
@@ -70,23 +98,18 @@ fn main() {
 
         loop {
             let jail_changes = jails.read();
-	    let mut msg: String = String::new();
-	    msg = msg + "     ";
-	    
+            let mut msg: String = String::new();
+            msg = msg + "  ";
+
             if jail_changes != "" {
                 show_monitor(&jail_changes, dpy, root);
             }
 
-	    for ((icon, suffix), module) in &update_vec {
-		msg = msg + &add(&module.read(), *icon, *suffix);
-	    }
+            for (icon, suffix, module) in update_map.iter_mut() {
+                msg = msg + &add(&module.read(), *icon, *suffix);
+            }
 
-            put(
-                &msg,
-                dpy,
-                root,
-            );
-
+            put(&msg, dpy, root);
             thread::sleep(duration);
         }
     }
@@ -102,12 +125,17 @@ fn put(msg: &str, dpy: *mut _XDisplay, root: u64) {
 }
 
 fn add(module: &str, icon: char, suffix: char) -> String {
-    icon.to_string() + " " + module + " " + &suffix.to_string() + "     "
+    format!("      {} {} {}", icon, module, suffix)
 }
 
-fn watch(map: &mut HashMap<(char, char), &dyn Monitor>, format_pair: (char, char), module: &'static dyn Monitor, option: bool) {
+fn watch<'a>(
+    map: &'a mut Vec<(char, char, Box<dyn Monitor>)>,
+    format_pair: (char, char),
+    module: Box<dyn Monitor>,
+    option: bool,
+) {
     if option {
-	map.insert(format_pair, module);
+        map.push((format_pair.0, format_pair.1, module));
     }
 }
 

@@ -59,6 +59,6 @@ impl Monitor for Memory {
 
 	let total = mem_all - (mem_inactive + mem_cache + mem_free);
 
-	((total as f64 / mem_all as f64) * 100.0).to_string()
+	(((total as f64 / mem_all as f64) * 100.0) as i32).to_string()
     }
 }
