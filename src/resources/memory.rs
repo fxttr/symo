@@ -23,42 +23,47 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-use sysctl::Sysctl;
-use sysctl::Ctl;
+#[cfg(target_os = "freebsd")]
+use sysctl::{Ctl, Sysctl};
 
 use crate::monitor::Monitor;
 
-pub struct Memory {
-    
-}
+pub struct Memory {}
 
 impl Memory {
     pub fn new() -> Self {
-	Self {}
+        Self {}
     }
 
+    #[cfg(target_os = "freebsd")]
     fn get_value(&self, ctl: Ctl) -> u64 {
-	ctl.value_string().unwrap().parse::<u64>().unwrap()
+        ctl.value_string().unwrap().parse::<u64>().unwrap()
     }
 }
 
 impl Monitor for Memory {
+    #[cfg(target_os = "freebsd")]
     fn read(&mut self) -> String {
-	let physmem = sysctl::Ctl::new("hw.physmem").unwrap();
-	let pagesize = sysctl::Ctl::new("hw.pagesize").unwrap();
-	let inactive = sysctl::Ctl::new("vm.stats.vm.v_inactive_count").unwrap();
-	let cache = sysctl::Ctl::new("vm.stats.vm.v_cache_count").unwrap();
-	let free = sysctl::Ctl::new("vm.stats.vm.v_free_count").unwrap();
+        let physmem = sysctl::Ctl::new("hw.physmem").unwrap();
+        let pagesize = sysctl::Ctl::new("hw.pagesize").unwrap();
+        let inactive = sysctl::Ctl::new("vm.stats.vm.v_inactive_count").unwrap();
+        let cache = sysctl::Ctl::new("vm.stats.vm.v_cache_count").unwrap();
+        let free = sysctl::Ctl::new("vm.stats.vm.v_free_count").unwrap();
 
-	let mem_all = self.get_value(physmem);
-	let page_size = self.get_value(pagesize);
-	
-	let mem_inactive = self.get_value(inactive) * page_size;
-	let mem_cache = self.get_value(cache) * page_size;
-	let mem_free = self.get_value(free) * page_size;
+        let mem_all = self.get_value(physmem);
+        let page_size = self.get_value(pagesize);
 
-	let total = mem_all - (mem_inactive + mem_cache + mem_free);
+        let mem_inactive = self.get_value(inactive) * page_size;
+        let mem_cache = self.get_value(cache) * page_size;
+        let mem_free = self.get_value(free) * page_size;
 
-	(((total as f64 / mem_all as f64) * 100.0) as i32).to_string()
+        let total = mem_all - (mem_inactive + mem_cache + mem_free);
+
+        (((total as f64 / mem_all as f64) * 100.0) as i32).to_string()
+    }
+
+    #[cfg(target_os = "linux")]
+    fn read(&mut self) -> String {
+        "Not yet implemented".to_owned()
     }
 }

@@ -1,9 +1,9 @@
 [package]
 name = "symo"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
-authors = ["Florian Büstgens <fb@fx-ttr.de>"]
-description = "A simple DWM status bar for FreeBSD"
+authors = ["Florian Marrero Liestmann <f.m.liestmann@fx-ttr.de>"]
+description = "A simple DWM status bar"
 readme = "README.md"
 license = "BSD-2-Clause"
 categories = ["command-line-utilities"]
@@ -14,13 +14,15 @@ build = "build.rs"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-serde = { version = "1.0.133", features = ["derive"] }
-toml = "0.5.8"
-chrono = "0.4.19"
-interfaces = "0.0.8"
-nix = "0.24.1"
-kqueue = "1.0.6"
+serde = { version = "1.0.193", features = ["derive"] }
+toml = "0.8.8"
+chrono = "0.4.31"
+interfaces = "0.0.9"
+nix = "0.27.1"
+x11 = "2.21.0"
+libzetta = "0.5.0"
+
+[target.'cfg(freebsd)'.dependencies]
+sysctl = "0.5.5"
 jail = "0.2.0"
-x11 = "2.19.1"
-libzetta = "0.3.1"
-sysctl = "0.4.4"
+kqueue = "1.0.8"

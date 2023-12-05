@@ -25,6 +25,7 @@
 
 mod config;
 mod date;
+#[cfg(target_os = "freebsd")]
 mod jails;
 mod monitor;
 mod network;
@@ -33,6 +34,7 @@ mod volume;
 
 use crate::{date::Date, network::Network, volume::Volume};
 use config::Config;
+#[cfg(target_os = "freebsd")]
 use jails::Jails;
 use monitor::Monitor;
 use resources::battery::Battery;
@@ -47,6 +49,7 @@ fn main() {
     let config: Config = Config::new(Path::new("/usr/local/etc/symo.toml")).unwrap();
     let duration = Duration::from_millis(config.settings.refresh_intervall as u64 * 1000);
     let network: Network = Network::new();
+    #[cfg(target_os = "freebsd")]
     let mut jails: Jails = Jails::new();
     let volume: Volume = Volume::new();
     let memory: Memory = Memory::new();
@@ -96,12 +99,19 @@ fn main() {
         let root = XRootWindow(dpy, screen);
 
         loop {
-            let jail_changes = jails.read();
-            let mut msg: String = String::new();
-            msg = msg + "  ";
+            #[cfg(target_os = "freebsd")]
+            {
+                let jail_changes = jails.read();
+                if jail_changes != "" {
+                    show_monitor(&jail_changes, dpy, root);
+                }
+            }
 
-            if jail_changes != "" {
-                show_monitor(&jail_changes, dpy, root);
+            let mut msg: String = String::new();
+
+            #[cfg(target_os = "freebsd")]
+            {
+                msg = msg + "  ";
             }
 
             for (icon, suffix, module) in update_map.iter_mut() {

@@ -25,34 +25,56 @@
 
 use std::{fs::File, os::unix::prelude::AsRawFd};
 
-use nix::{libc::ioctl, request_code_read};
+use nix::libc::ioctl;
+#[cfg(target_os = "freebsd")]
+use nix::libc::request_code_read;
 
 use crate::monitor::Monitor;
 
+#[cfg(target_os = "freebsd")]
 pub struct Volume {
-    mixer: File
+    mixer: File,
 }
 
+#[cfg(target_os = "linux")]
+pub struct Volume {}
+
+#[cfg(target_os = "freebsd")]
 impl Volume {
     pub fn new() -> Self {
-	let mixer = File::open("/dev/mixer").expect("Could not open mixer file.");
-	
-	Self {
-	    mixer
-	}
+        let mixer = File::open("/dev/mixer").expect("Could not open mixer file.");
+
+        Self { mixer }
+    }
+}
+
+#[cfg(target_os = "linux")]
+impl Volume {
+    pub fn new() -> Self {
+        Self {}
     }
 }
 
 impl Monitor for Volume {
+    #[cfg(target_os = "freebsd")]
     fn read(&mut self) -> String {
-	const SPI_IOC_MAGIC: u8 = b'M';
-	
-	let result: i32 = -1;
-	let device: u8 = 0; // We always want "vol". See sys/soundcard.sh:1009
+        const SPI_IOC_MAGIC: u8 = b'M';
 
-	unsafe {
-	    ioctl(self.mixer.as_raw_fd(), request_code_read!(SPI_IOC_MAGIC, device, std::mem::size_of::<i32>()), &result);
-	    (result & 0x7f).to_string()
-	}
+        let result: i32 = -1;
+        let device: u8 = 0; // We always want "vol". See sys/soundcard.sh:1009
+
+        unsafe {
+            ioctl(
+                self.mixer.as_raw_fd(),
+                request_code_read!(SPI_IOC_MAGIC, device, std::mem::size_of::<i32>()),
+                &result,
+            );
+            (result & 0x7f).to_string()
+        }
+    }
+
+    #[cfg(target_os = "linux")]
+    fn read(&mut self) -> String {
+        "Not yet implemented".to_owned()
     }
 }

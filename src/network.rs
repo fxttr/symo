@@ -31,16 +31,17 @@ use crate::monitor::Monitor;
 
 pub struct Network {
     interfaces: Vec<Interface>,
-    rounds: i32
+    rounds: i32,
 }
 
 impl Network {
     pub fn new() -> Self {
-        let interfaces = Interface::get_all().expect("Could not get any network Interfaces. Network component disabled.");
+        let interfaces = Interface::get_all()
+            .expect("Could not get any network Interfaces. Network component disabled.");
 
         Network {
             interfaces,
-	    rounds: 0
+            rounds: 0,
         }
     }
 }
@@ -49,29 +50,33 @@ impl Monitor for Network {
     fn read(&mut self) -> String {
         let mut result: String = String::new();
 
-        for interface in self.interfaces.iter().filter(|x| x.is_up() && x.is_running() && !x.is_loopback()) {
-	    let mut nic_addr: String = String::new();
+        for interface in self
+            .interfaces
+            .iter()
+            .filter(|x| x.is_up() && x.is_running() && !x.is_loopback())
+        {
+            let mut nic_addr: String = String::new();
 
-	      interface.addresses.iter().for_each(|x| {
-		match x.addr {
-		    Some(x) => {
-			nic_addr = match x {
-			    net::SocketAddr::V4(ref y) => format!("{}", y.ip()),
-			    net::SocketAddr::V6(ref y) => format!("{}", y.ip())
-			}
-		    },
-		    None => {}
-		};
-	    });
+            interface.addresses.iter().for_each(|x| {
+                match x.addr {
+                    Some(x) => {
+                        nic_addr = match x {
+                            net::SocketAddr::V4(ref y) => format!("{}", y.ip()),
+                            net::SocketAddr::V6(ref y) => format!("{}", y.ip()),
+                        }
+                    }
+                    None => {}
+                };
+            });
 
-	    if nic_addr.is_empty() {
-		continue;
-	    }
-	    
+            if nic_addr.is_empty() {
+                continue;
+            }
+
             result = result + " " + &interface.name + " " + &nic_addr
         }
 
-	self.rounds = (self.rounds + 1) % 10;
+        self.rounds = (self.rounds + 1) % 10;
 
         result
     }

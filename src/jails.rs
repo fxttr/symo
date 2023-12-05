@@ -22,45 +22,46 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 use jail::RunningJail;
 
 use crate::monitor::Monitor;
 
 pub struct Jails {
-    running: Vec::<String>
+    running: Vec<String>,
 }
 
 impl Jails {
     pub fn new() -> Self {
-	let mut running = Vec::new();
-	
-	for jail in RunningJail::all() {
-	    running.push(jail.name().unwrap());
-	}
-	
-	Self {
-	    running
-	}
+        let mut running = Vec::new();
+
+        for jail in RunningJail::all() {
+            running.push(jail.name().unwrap());
+        }
+
+        Self { running }
     }
 }
 impl Monitor for Jails {
     fn read(&mut self) -> String {
-	let mut new_jails = Vec::new();
-	let mut result = String::new();
+        let mut new_jails = Vec::new();
+        let mut result = String::new();
 
-	for jail in RunningJail::all() {
-	    new_jails.push(jail.name().unwrap());
-	}
+        for jail in RunningJail::all() {
+            new_jails.push(jail.name().unwrap());
+        }
 
-	let changes: Vec<String> = new_jails.clone().into_iter().filter(|elem| !self.running.contains(elem)).collect();
+        let changes: Vec<String> = new_jails
+            .clone()
+            .into_iter()
+            .filter(|elem| !self.running.contains(elem))
+            .collect();
 
-	for change in changes {
-	    result += &("-> Started jail ".to_owned() + &change);
-	}
+        for change in changes {
+            result += &("-> Started jail ".to_owned() + &change);
+        }
 
-	self.running = new_jails;
+        self.running = new_jails;
 
-	result
+        result
     }
 }

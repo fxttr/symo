@@ -24,15 +24,15 @@
  */
 
 use serde::Deserialize;
-use std::path::Path;
 use std::fs;
+use std::path::Path;
 use toml::de::Error;
 
 #[derive(Deserialize)]
 pub struct Config {
     pub components: Components,
     pub settings: Settings,
-    pub date: Date
+    pub date: Date,
 }
 
 #[derive(Deserialize)]
@@ -41,24 +41,62 @@ pub struct Components {
     pub ethernet: bool,
     pub battery: bool,
     pub volume: bool,
-    pub date: bool
+    pub date: bool,
 }
 
 #[derive(Deserialize)]
 pub struct Settings {
-    pub refresh_intervall: i32
+    pub refresh_intervall: i32,
 }
 
 #[derive(Deserialize)]
 pub struct Date {
-    pub format: String
+    pub format: String,
 }
-
 
 impl Config {
     pub fn new(path: &Path) -> Result<Config, Error> {
-	let content = fs::read_to_string(path).unwrap();
+        match fs::read_to_string(path) {
+            Ok(content) => Ok(toml::from_str(&content[..])?),
+            Err(_) => Ok(Config::default()),
+        }
+    }
+}
 
-	Ok(toml::from_str(&content[..])?)
+impl Default for Config {
+    fn default() -> Self {
+        Self {
+            components: Default::default(),
+            settings: Default::default(),
+            date: Default::default(),
+        }
+    }
+}
+
+impl Default for Components {
+    fn default() -> Self {
+        Self {
+            memory: false,
+            ethernet: true,
+            battery: false,
+            volume: false,
+            date: true,
+        }
+    }
+}
+
+impl Default for Date {
+    fn default() -> Self {
+        Self {
+            format: "%H:%M:%S - %d.%m.%Y".to_string(),
+        }
+    }
+}
+
+impl Default for Settings {
+    fn default() -> Self {
+        Self {
+            refresh_intervall: 1,
+        }
     }
 }
