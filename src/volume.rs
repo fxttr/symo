@@ -25,11 +25,11 @@
 
 use std::{fs::File, os::unix::prelude::AsRawFd};
 
+use crate::monitor::Monitor;
+#[cfg(target_os = "linux")]
 use nix::libc::ioctl;
 #[cfg(target_os = "freebsd")]
 use nix::libc::request_code_read;
-
-use crate::monitor::Monitor;
 
 #[cfg(target_os = "freebsd")]
 pub struct Volume {

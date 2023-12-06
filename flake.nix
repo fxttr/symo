@@ -63,14 +63,18 @@
         packages.default = hadron;
 
         devShells.default = pkgs.mkShell {
+          LIBCLANG_PATH = "${pkgs.llvmPackages.libclang}/lib";
           inputsFrom = builtins.attrValues self.checks;
 
           nativeBuildInputs = with pkgs; [
             fenix-toolchain
             rust-analyzer
+            rustfmt
+            clippy
             pkg-config
             zfs
             xorg.libX11
+            pipewire
           ];
         };
       });

@@ -58,15 +58,12 @@ impl Monitor for Network {
             let mut nic_addr: String = String::new();
 
             interface.addresses.iter().for_each(|x| {
-                match x.addr {
-                    Some(x) => {
-                        nic_addr = match x {
-                            net::SocketAddr::V4(ref y) => format!("{}", y.ip()),
-                            net::SocketAddr::V6(ref y) => format!("{}", y.ip()),
-                        }
+                if let Some(x) = x.addr {
+                    nic_addr = match x {
+                        net::SocketAddr::V4(ref y) => format!("{}", y.ip()),
+                        net::SocketAddr::V6(ref y) => format!("{}", y.ip()),
                     }
-                    None => {}
-                };
+                }
             });
 
             if nic_addr.is_empty() {
