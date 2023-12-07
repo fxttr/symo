@@ -28,7 +28,7 @@ use std::fs;
 use std::path::Path;
 use toml::de::Error;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Default)]
 pub struct Config {
     pub components: Components,
     pub settings: Settings,
@@ -59,16 +59,6 @@ impl Config {
         match fs::read_to_string(path) {
             Ok(content) => Ok(toml::from_str(&content[..])?),
             Err(_) => Ok(Config::default()),
-        }
-    }
-}
-
-impl Default for Config {
-    fn default() -> Self {
-        Self {
-            components: Default::default(),
-            settings: Default::default(),
-            date: Default::default(),
         }
     }
 }

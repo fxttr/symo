@@ -99,18 +99,15 @@ fn main() {
         let root = XRootWindow(dpy, screen);
 
         loop {
+            let mut msg: String = String::new();
+
             #[cfg(target_os = "freebsd")]
             {
                 let jail_changes = jails.read();
                 if jail_changes != "" {
                     show_monitor(&jail_changes, dpy, root);
                 }
-            }
 
-            let mut msg: String = String::new();
-
-            #[cfg(target_os = "freebsd")]
-            {
                 msg = msg + "  ";
             }
 
@@ -119,6 +116,7 @@ fn main() {
             }
 
             put(&msg, dpy, root);
+
             thread::sleep(duration);
         }
     }
@@ -133,8 +131,8 @@ fn put(msg: &str, dpy: *mut _XDisplay, root: u64) {
     }
 }
 
-fn watch<'a>(
-    map: &'a mut Vec<(char, char, Box<dyn Monitor>)>,
+fn watch(
+    map: &mut Vec<(char, char, Box<dyn Monitor>)>,
     format_pair: (char, char),
     module: Box<dyn Monitor>,
     option: bool,
