@@ -40,30 +40,36 @@
           "cargo"
           "clippy"
           "rust-analysis"
-          "rust-src"
           "rustfmt"
           "llvm-tools-preview"
         ]);
 
         craneLib = (crane.mkLib pkgs).overrideToolchain fenix-toolchain;
 
-        hadron = craneLib.buildPackage {
+        symo = craneLib.buildPackage {
+          LIBCLANG_PATH = "${pkgs.llvmPackages.libclang.lib}/lib";
           src = craneLib.cleanCargoSource ./.;
 
           doCheck = false;
 
-          buildInputs = [ ];
+          buildInputs = with pkgs; [
+            rustPlatform.bindgenHook
+            pkg-config
+            zfs
+            xorg.libX11
+            pipewire
+          ];
         };
       in
       {
         checks = {
-          inherit hadron;
+          inherit symo;
         };
 
-        packages.default = hadron;
+        packages.default = symo;
 
         devShells.default = pkgs.mkShell {
-          LIBCLANG_PATH = "${pkgs.llvmPackages.libclang}/lib";
+          LIBCLANG_PATH = "${pkgs.llvmPackages.libclang.lib}/lib";
           inputsFrom = builtins.attrValues self.checks;
 
           nativeBuildInputs = with pkgs; [
@@ -75,6 +81,7 @@
             zfs
             xorg.libX11
             pipewire
+            rustPlatform.bindgenHook
           ];
         };
       });
