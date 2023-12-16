@@ -1,4 +1,3 @@
-pub mod battery;
 /**
  * Copyright (c) 2022, Florian Büstgens
  * All rights reserved.
@@ -24,3 +23,4 @@ pub mod battery;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 pub mod memory;
+pub mod battery;

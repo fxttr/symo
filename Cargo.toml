@@ -18,12 +18,9 @@ serde = { version = "1.0.193", features = ["derive"] }
 toml = "0.8.8"
 chrono = "0.4.31"
 interfaces = "0.0.9"
-nix = "0.27.1"
+nix = { version = "0.27.1", features = ["ioctl"] }
 x11 = "2.21.0"
 libzetta = "0.5.0"
-pipewire = "0.7.2"
-
-[target.'cfg(freebsd)'.dependencies]
 sysctl = "0.5.5"
 jail = "0.2.0"
 kqueue = "1.0.8"

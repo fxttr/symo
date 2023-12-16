@@ -41,6 +41,7 @@ impl Jails {
         Self { running }
     }
 }
+
 impl Monitor for Jails {
     fn read(&mut self) -> String {
         let mut new_jails = Vec::new();
