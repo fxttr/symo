@@ -23,57 +23,54 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-use std::{fs::File, os::unix::prelude::AsRawFd};
-
 use crate::monitor::Monitor;
-use nix::libc::ioctl;
-#[cfg(target_os = "freebsd")]
-use nix::request_code_read;
+use pipewire::spa::ReadableDict;
+use pipewire::types::ObjectType;
+use pipewire::{Context, MainLoop};
+use std::sync::Arc;
+use std::thread;
 
-#[cfg(target_os = "freebsd")]
 pub struct Volume {
-    mixer: File,
+    volume: Arc<String>,
 }
 
-#[cfg(target_os = "linux")]
-pub struct Volume {}
 
-#[cfg(target_os = "freebsd")]
 impl Volume {
     pub fn new() -> Self {
-        let mixer = File::open("/dev/mixer").expect("Could not open mixer file.");
+        let mut result = Self {
+            volume: Arc::new(String::from("-")),
+        };
 
-        Self { mixer }
+        result.start_main_loop();
+
+        result
     }
-}
 
-#[cfg(target_os = "linux")]
-impl Volume {
-    pub fn new() -> Self {
-        Self {}
+    fn start_main_loop(&mut self) -> () {
+        thread::spawn(move || {
+        let main_loop = MainLoop::new().expect("Failed to create main loop");
+        let context = Context::new(&main_loop).expect("Failed to create context");
+        let core = context.connect(None).unwrap();
+        let registry = core.get_registry().expect("Failed to create registry");
+
+        let _ = registry
+            .add_listener_local()
+            .global(move |global| {
+                if global.type_ == ObjectType::Port {
+                    let props = global.props.as_ref().unwrap();
+                    let test = props.get("port.name").unwrap();
+                    println!("{}", test.to_owned());
+                }
+            })
+            .register();
+
+        main_loop.run();
+    });
     }
 }
 
 impl Monitor for Volume {
-    #[cfg(target_os = "freebsd")]
     fn read(&mut self) -> String {
-        const SPI_IOC_MAGIC: u8 = b'M';
-
-        let result: i32 = -1;
-        let device: u8 = 0; // We always want "vol". See sys/soundcard.sh:1009
-
-        unsafe {
-            ioctl(
-                self.mixer.as_raw_fd(),
-                request_code_read!(SPI_IOC_MAGIC, device, std::mem::size_of::<i32>()),
-                &result,
-            );
-            (result & 0x7f).to_string()
-        }
-    }
-
-    #[cfg(target_os = "linux")]
-    fn read(&mut self) -> String {
-        "Not yet implemented".to_owned()
+        self.volume.to_string()
     }
 }

@@ -11,8 +11,6 @@ repository = "https://github.com/fxttr/symo"
 keywords = ["x11", "dwm", "wm", "status"]
 build = "build.rs"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
 serde = { version = "1.0.193", features = ["derive"] }
 toml = "0.8.8"
@@ -22,5 +20,5 @@ nix = { version = "0.27.1", features = ["ioctl"] }
 x11 = "2.21.0"
 libzetta = "0.5.0"
 sysctl = "0.5.5"
-jail = "0.2.0"
-kqueue = "1.0.8"
+lxc = "0.7.0"
+pipewire = "0.7.2"

@@ -37,24 +37,6 @@ impl Battery {
 }
 
 impl Monitor for Battery {
-    #[cfg(target_os = "freebsd")]
-    fn read(&mut self) -> String {
-        let battery_life = sysctl::Ctl::new("hw.acpi.battery.life").unwrap();
-        let battery_state = sysctl::Ctl::new("hw.acpi.battery.state").unwrap();
-
-        let battery_life_value = battery_life.value_string().unwrap();
-        let battery_state_value = battery_state.value_string().unwrap();
-
-        String::from(match battery_state_value.as_str() {
-            "1" => "BAT ",
-            "2" => "PD ",
-            "4" => "CRIT ",
-            _ => "UKN ",
-        }) + &battery_life_value
-            + "%"
-    }
-
-    #[cfg(target_os = "linux")]
     fn read(&mut self) -> String {
         "Not yet implemented".to_owned()
     }

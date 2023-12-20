@@ -69,7 +69,7 @@ impl Default for Components {
             memory: false,
             ethernet: true,
             battery: false,
-            volume: false,
+            volume: true,
             date: true,
         }
     }
