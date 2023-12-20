@@ -42,6 +42,7 @@
           "rust-analysis"
           "rustfmt"
           "llvm-tools-preview"
+          "rust-src"
         ]);
 
         craneLib = (crane.mkLib pkgs).overrideToolchain fenix-toolchain;
@@ -82,6 +83,7 @@
             xorg.libX11
             pipewire
             rustPlatform.bindgenHook
+            lxc
           ];
         };
       });
