@@ -66,10 +66,10 @@ impl Config {
 impl Default for Components {
     fn default() -> Self {
         Self {
-            memory: false,
+            memory: true,
             ethernet: true,
             battery: false,
-            volume: true,
+            volume: false,
             date: true,
         }
     }

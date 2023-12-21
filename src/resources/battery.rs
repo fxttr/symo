@@ -23,21 +23,41 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#[cfg(target_os = "freebsd")]
-use sysctl::Sysctl;
-
 use crate::monitor::Monitor;
+use battery::{Manager, State};
 
-pub struct Battery {}
+pub struct Battery {
+    manager: Manager,
+}
 
 impl Battery {
     pub fn new() -> Self {
-        Self {}
+        Self {
+            manager: Manager::new().unwrap(),
+        }
     }
 }
 
 impl Monitor for Battery {
     fn read(&mut self) -> String {
-        "Not yet implemented".to_owned()
+        let battery = self.manager.batteries().unwrap().next();
+
+        match battery {
+            Some(battery) => match battery {
+                Ok(battery) => {
+                    if battery.state() == State::Charging {
+                        format!(
+                            "{}% : {:?} Min to full",
+                            battery.state_of_charge().value * 100.0,
+                            battery.time_to_full().unwrap() / 60.0
+                        )
+                    } else {
+                        format!("{}%", battery.state_of_charge().value * 100.0)
+                    }
+                }
+                Err(_) => String::from("No Battery found"),
+            },
+            None => String::from("No Battery found"),
+        }
     }
 }
