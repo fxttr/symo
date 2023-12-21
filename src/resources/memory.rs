@@ -23,6 +23,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+use sys_info::MemInfo;
+
 use crate::monitor::Monitor;
 
 pub struct Memory {}
@@ -35,6 +37,11 @@ impl Memory {
 
 impl Monitor for Memory {
     fn read(&mut self) -> String {
-        "Not yet implemented".to_owned()
+        let mem_info_result = sys_info::mem_info();
+
+        match mem_info_result {
+            Ok(mem_info) => ((((mem_info.total as f64 - mem_info.free as f64) / mem_info.total as f64) * 100.0) as i32).to_string(),
+            Err(_) => String::from("Memory could not be measured."),
+        }
     }
 }
