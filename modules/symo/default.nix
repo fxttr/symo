@@ -107,7 +107,7 @@ in
         RestrictRealtime = true;
         RestrictSUIDSGID = true;
         SystemCallArchitectures = "native";
-        SystemCallFilter = [ "@system-service" "~@privileged" "~@resources" "@pkey" ];
+        SystemCallFilter = [ "@system-service" "~@privileged" "~@resources" ];
         UMask = "0027";
       };
 
