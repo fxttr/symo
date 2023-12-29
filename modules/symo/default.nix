@@ -104,11 +104,6 @@ in
         SystemCallFilter = [ "@system-service" "~@privileged" "~@resources" "@pkey" ];
         UMask = "0027";
       };
-
-      preStart = ''
-        install -d -m750 ${config.services.symo.dataDir}/Config
-        rm -f "$installedConfigFile" && install -m640 ${configFile} "$installedConfigFile"
-      '';
     };
   };
 }
