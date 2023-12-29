@@ -73,7 +73,7 @@
 
         nixosModules = {
           nixos = import ./modules/symo self;
-          home-manager = ./modules/symo self;
+          home-manager = import ./modules/symo self;
         };
 
         devShells.default = pkgs.mkShell {
