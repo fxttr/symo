@@ -94,7 +94,7 @@ fn main() {
 
         loop {
             let mut msg: String = String::new();
-            msg = "".to_owned() + &msg;
+            msg = "".to_owned() + &msg;
 
             for (icon, suffix, module) in update_map.iter_mut() {
                 msg = format!("{}      {} {} {}", msg, *icon, module.read(), *suffix);

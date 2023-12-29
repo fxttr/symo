@@ -24,7 +24,7 @@
  */
 
 use crate::monitor::Monitor;
-use battery::{Manager, State};
+use battery::{Manager, State, units::time::minute};
 
 pub struct Battery {
     manager: Manager,
@@ -46,13 +46,19 @@ impl Monitor for Battery {
             Some(battery) => match battery {
                 Ok(battery) => {
                     if battery.state() == State::Charging {
-                        format!(
-                            "{}% : {:?} Min to full",
-                            battery.state_of_charge().value * 100.0,
-                            battery.time_to_full().unwrap() / 60.0
-                        )
+                        match battery.time_to_full() {
+                            Some(time) => format!(
+                                "{:.2}% : {:.0} Min to full",
+                                battery.state_of_charge().value * 100.0,
+                                time.get::<minute>()
+                            ),
+                            None => format!(
+                                "{:.2}% : ? Min to full",
+                                battery.state_of_charge().value * 100.0,
+                            ),
+                        }
                     } else {
-                        format!("{}%", battery.state_of_charge().value * 100.0)
+                        format!("{:.2}%", battery.state_of_charge().value * 100.0)
                     }
                 }
                 Err(_) => String::from("No Battery found"),

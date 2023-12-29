@@ -68,7 +68,7 @@ impl Default for Components {
         Self {
             memory: true,
             ethernet: true,
-            battery: false,
+            battery: true,
             volume: false,
             date: true,
         }
