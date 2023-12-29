@@ -68,8 +68,6 @@ in
       description = "symo";
       documentation = [ "https://github.com/fxttr/symo" ];
 
-      after = [ "multi-user.target" ];
-
       serviceConfig = {
         Restart = "always";
         ExecStart = "${lib.getBin cfg.package}/target/release/symo";
