@@ -103,7 +103,6 @@ in
         ProtectSystem = "strict";
         ReadOnlyPaths = [ "/" ];
         RemoveIPC = true;
-        RestrictAddressFamilies = [ "AF_NETLINK" "AF_INET" "AF_INET6" ];
         RestrictNamespaces = true;
         RestrictRealtime = true;
         RestrictSUIDSGID = true;
