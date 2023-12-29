@@ -82,7 +82,7 @@ in
       Service = {
         Type = "exec";
         Restart = "always";
-        ExecStart = "${lib.getBin cfg.package}/target/release/symo";
+        ExecStart = "${lib.getBin cfg.package}/bin/symo";
 
         # Hardening
         CapabilityBoundingSet = [ "AF_NETLINK" "AF_INET" "AF_INET6" ];
