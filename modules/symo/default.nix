@@ -5,7 +5,7 @@ let
   inherit (flake.packages.${pkgs.stdenv.hostPlatform.system}) default;
 
   cfg = config.services.symo;
-in 
+in
 {
   options = {
     services.symo = {
@@ -58,6 +58,14 @@ in
         default = default;
         description = ''
           The symo package to use with the service
+        '';
+      };
+
+      systemdTarget = mkOption {
+        type = types.str;
+        default = "graphical-session.target";
+        description = ''
+          Systemd target to bind to
         '';
       };
     };
