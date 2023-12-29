@@ -90,8 +90,6 @@ in
         DevicePolicy = "strict";
         IPAddressAllow = "localhost";
         LockPersonality = true;
-
-        # MemoryDenyWriteExecute = true;
         NoNewPrivileges = true;
         PrivateDevices = true;
         PrivateTmp = true;
@@ -111,7 +109,7 @@ in
         RestrictRealtime = true;
         RestrictSUIDSGID = true;
         SystemCallArchitectures = "native";
-        SystemCallFilter = [ "@system-service" "~@privileged" "~@resources" "@pkey" ];
+        #SystemCallFilter = [ "@system-service" "~@privileged" "~@resources" "@pkey" ];
         UMask = "0027";
       };
 
