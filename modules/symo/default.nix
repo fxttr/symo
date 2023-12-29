@@ -65,10 +65,14 @@ in
 
   config = lib.mkIf cfg.enable {
     systemd.user.services.symo = {
-      description = "symo";
-      documentation = [ "https://github.com/fxttr/symo" ];
+      Unit = {
+        Description = "symo";
+        PartOf = [ cfg.systemdTarget ];
+        After = [ cfg.systemdTarget ];
+      };
 
-      serviceConfig = {
+      Service = {
+        Type = "exec";
         Restart = "always";
         ExecStart = "${lib.getBin cfg.package}/target/release/symo";
 
@@ -101,6 +105,10 @@ in
         SystemCallArchitectures = "native";
         SystemCallFilter = [ "@system-service" "~@privileged" "~@resources" "@pkey" ];
         UMask = "0027";
+      };
+
+      Install = {
+        WantedBy = [ cfg.systemdTarget ];
       };
     };
   };
