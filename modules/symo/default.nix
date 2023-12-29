@@ -95,7 +95,6 @@ in
         PrivateUsers = true;
         ProtectClock = true;
         ProtectControlGroups = true;
-        ProtectHome = true;
         ProtectHostname = true;
         ProtectKernelLogs = true;
         ProtectKernelModules = true;
