@@ -64,7 +64,7 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    systemd.services.symo = {
+    systemd.user.services.symo = {
       description = "symo";
       documentation = [ "https://github.com/fxttr/symo" ];
 

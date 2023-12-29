@@ -69,10 +69,7 @@
 
         packages.default = symo;
 
-        nixosModule = inputs.self.nixosModules.nixos;
-
         nixosModules = {
-          nixos = import ./modules/symo self;
           home-manager = import ./modules/symo self;
         };
 
