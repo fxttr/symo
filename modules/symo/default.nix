@@ -85,7 +85,6 @@ in
         ExecStart = "${lib.getBin cfg.package}/bin/symo";
 
         # Hardening
-        CapabilityBoundingSet = [ "AF_NETLINK" "AF_INET" "AF_INET6" ];
         DeviceAllow = [ "/dev/stdin r" ];
         DevicePolicy = "strict";
         IPAddressAllow = "localhost";
@@ -109,7 +108,7 @@ in
         RestrictRealtime = true;
         RestrictSUIDSGID = true;
         SystemCallArchitectures = "native";
-        #SystemCallFilter = [ "@system-service" "~@privileged" "~@resources" "@pkey" ];
+        SystemCallFilter = [ "@system-service" "~@privileged" "~@resources" "@pkey" ];
         UMask = "0027";
       };
 
