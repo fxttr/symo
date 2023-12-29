@@ -68,6 +68,7 @@
         };
 
         packages.default = symo;
+        nixosModules.symo = import ./modules/symo self;
 
         devShells.default = pkgs.mkShell {
           LIBCLANG_PATH = "${pkgs.llvmPackages.libclang.lib}/lib";
