@@ -2,7 +2,7 @@ flake: { config, lib, pkgs, ... }:
 
 let
   inherit (lib) filterAttrs types mkEnableOption mkOption;
-  inherit (flake.packages.${pkgs.stdenv.hostPlatform.system}.default) symo;
+  inherit (flake.packages.${pkgs.stdenv.hostPlatform.system}) default;
 
   cfg = config.services.symo;
 in 
@@ -55,7 +55,7 @@ in
 
       package = mkOption {
         type = types.package;
-        default = symo;
+        default = default;
         description = ''
           The symo package to use with the service
         '';
