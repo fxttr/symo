@@ -25,7 +25,7 @@
     };
   };
 
-  outputs = { self, nixpkgs, crane, flake-utils, fenix, rust-overlay, ... }:
+  outputs = { self, nixpkgs, crane, flake-utils, fenix, rust-overlay, ... }@inputs:
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs {
@@ -68,7 +68,13 @@
         };
 
         packages.default = symo;
-        nixosModules.symo = import ./modules/symo self;
+
+        nixosModule = inputs.self.nixosModules.nixos;
+
+        nixosModules = {
+          nixos = import ./modules/symo self;
+          home-manager = import ./modules/symo self;
+        };
 
         devShells.default = pkgs.mkShell {
           LIBCLANG_PATH = "${pkgs.llvmPackages.libclang.lib}/lib";
